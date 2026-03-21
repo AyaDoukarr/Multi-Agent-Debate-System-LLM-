@@ -1,105 +1,109 @@
 # Multi-Agent Debate System
 
-Ce projet consiste à créer une application de débat basée sur des agents intelligents utilisant des modèles de langage (LLM).  
-Le principe est simple : deux agents débattent d’un sujet (POUR / CONTRE), un modérateur analyse les échanges, et un juge attribue des scores.
+Ce projet consiste à développer une application de débat basée sur des agents intelligents utilisant des modèles de langage (LLM).  
+Le système permet de simuler un débat entre deux agents ayant des positions opposées, avec un modérateur qui analyse les échanges et un juge qui attribue des scores.
 
-Le projet a été réalisé dans le cadre d’un TP en intelligence artificielle.
+Ce travail a été réalisé dans le cadre d’un TP en intelligence artificielle.
+## Objectif
 
----
+L’objectif du projet est de :
 
-## 🎯 Objectif
+- simuler un débat structuré entre plusieurs agents  
+- intégrer des techniques de raisonnement (et pas seulement générer du texte)  
+- produire une analyse critique et une synthèse  
+- proposer une interface simple avec Streamlit  
 
-L’objectif était de :
-
-- simuler un débat entre plusieurs agents  
-- utiliser des techniques de raisonnement (pas juste générer du texte)  
-- analyser les arguments et produire une synthèse  
-- créer une interface simple avec Streamlit  
-
----
-
-## ⚙️ Fonctionnement
+## Fonctionnement
 
 Le système repose sur plusieurs agents :
 
-- **Agent POUR** : défend le sujet  
-- **Agent CONTRE** : donne un avis opposé  
-- **Modérateur** : résume et analyse les arguments  
-- **Juge IA** : attribue des scores (logique, clarté, persuasion)  
+- Agent POUR : défend le sujet  
+- Agent CONTRE : propose un point de vue opposé  
+- Modérateur : analyse les arguments et produit une synthèse  
+- Juge IA : évalue les réponses selon plusieurs critères  
 
-Les agents interagissent entre eux pour construire un débat structuré.
+Les agents interagissent entre eux pour construire un débat progressif et structuré.
 
----
 
-## 🧠 Choix des techniques de raisonnement
+## Techniques de raisonnement
 
-On a utilisé deux techniques principales :
+Deux techniques principales ont été utilisées :
 
 ### ReAct (Reason + Act)
 
-Chaque agent suit un cycle :
+Chaque agent suit une boucle :
 
-- analyser le sujet  
-- produire des arguments  
-- observer la réponse adverse  
-- répondre  
+- analyse du sujet  
+- génération d’arguments  
+- observation des réponses adverses  
+- réaction adaptée  
 
-👉 Cette technique permet d’avoir un vrai échange et pas des réponses isolées.
-
----
+Cette approche permet de simuler un raisonnement dynamique et un vrai échange entre agents.
 
 ### Self-Correction
 
-Le modérateur :
+Le modérateur joue un rôle d’analyse :
 
-- compare les arguments  
-- détecte les points faibles  
-- produit une synthèse  
+- comparaison des arguments  
+- identification des points forts et faibles  
+- production d’une synthèse équilibrée  
 
-👉 Cela permet d’avoir un résultat plus équilibré.
+Cela permet d’améliorer la qualité globale du débat.
 
----
 
-## 🛠️ Technologies utilisées
+## Technologies utilisées
 
 - Python  
 - Streamlit  
 - API LLM  
-- Architecture en modules (agents, core, ui, utils)
+- Architecture modulaire (agents, core, ui, utils)
 
----
 
-## 🚀 Installation
+## Installation
 
 Cloner le projet :
 
 ```bash
 git clone https://github.com/AyaDoukarr/projet-ai.git
 cd projet-ai
+```
 Installer les dépendances :
-
+```bash
 pip install -r requirements.txt
-🔑 Configuration
+```
+Configuration
 
 Créer un fichier .env et ajouter la clé API :
-
+```bash
 OPENAI_API_KEY=your_key
-▶️ Lancer l’application
+```
+Lancer l’application
+```bash
 streamlit run app.py
+```
+Puis ouvrir dans le navigateur :
 
-Puis ouvrir :
+Puis ouvrir dans le navigateur :
 
 http://localhost:8501
-📁 Structure du projet
-agents/     → logique des agents
-core/       → communication avec le LLM
-ui/         → interface Streamlit
-utils/      → gestion de session
-app.py      → point d’entrée
-📌 Remarques
+
+
+## Structure du projet
+
+```text
+agents/     # logique des agents
+core/       # communication avec le LLM
+ui/         # interface utilisateur
+utils/      # gestion de session
+app.py      # point d’entrée
+```
+## Remarques
 les réponses peuvent varier selon le sujet
 le système dépend du modèle utilisé
-le but est surtout de montrer le raisonnement multi-agents
-👥 Auteurs
-Aya Doukarr
-Aya Es-Smahi
+le projet vise surtout à illustrer le raisonnement multi-agents
+
+## 👤 Auteurs
+
+Aya Doukar
+
+Aya Es-smahi
