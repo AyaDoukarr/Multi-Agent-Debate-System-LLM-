@@ -1,136 +1,105 @@
-# Multi-Agent Debate System (LLM)
+# Multi-Agent Debate System
 
-Ce projet implémente une architecture **multi-agents** basée sur des LLM, dans laquelle deux agents débattent d’un sujet proposé par l’utilisateur tandis qu’un troisième agent agit comme modérateur pour produire une synthèse équilibrée.
+Ce projet consiste à créer une application de débat basée sur des agents intelligents utilisant des modèles de langage (LLM).  
+Le principe est simple : deux agents débattent d’un sujet (POUR / CONTRE), un modérateur analyse les échanges, et un juge attribue des scores.
 
-Le projet a été réalisé dans le cadre d’un TP en IA générative portant sur les **agents intelligents, le raisonnement avancé et l’intégration via Streamlit** :contentReference[oaicite:1]{index=1}.
+Le projet a été réalisé dans le cadre d’un TP en intelligence artificielle.
 
 ---
 
 ## 🎯 Objectif
 
-L’objectif était de concevoir une application interactive capable :
+L’objectif était de :
 
-- de simuler un débat structuré entre deux agents  
-- d’implémenter des techniques explicites de raisonnement  
-- de produire une synthèse cohérente et argumentée  
-- d’offrir une interface simple via Streamlit  
-
----
-
-## ⚙️ Architecture
-
-Le système repose sur trois agents :
-
-### 🟢 Agent 1 — Position A  
-Analyse le sujet proposé et développe une argumentation structurée.
-
-### 🔵 Agent 2 — Position B  
-Propose un point de vue opposé en répondant aux arguments du premier agent.
-
-### 🟣 Modérateur  
-Observe les échanges, identifie les points forts/faibles et produit une conclusion équilibrée.
+- simuler un débat entre plusieurs agents  
+- utiliser des techniques de raisonnement (pas juste générer du texte)  
+- analyser les arguments et produire une synthèse  
+- créer une interface simple avec Streamlit  
 
 ---
 
-## 🧠 Techniques de raisonnement utilisées
+## ⚙️ Fonctionnement
 
-Le projet implémente plusieurs approches :
+Le système repose sur plusieurs agents :
 
-### ReAct (principal)
+- **Agent POUR** : défend le sujet  
+- **Agent CONTRE** : donne un avis opposé  
+- **Modérateur** : résume et analyse les arguments  
+- **Juge IA** : attribue des scores (logique, clarté, persuasion)  
 
-Chaque agent suit une boucle :
+Les agents interagissent entre eux pour construire un débat structuré.
 
-1. Analyse du sujet  
-2. Production d’arguments  
-3. Observation de la réponse adverse  
-4. Réponse adaptée  
+---
+
+## 🧠 Choix des techniques de raisonnement
+
+On a utilisé deux techniques principales :
+
+### ReAct (Reason + Act)
+
+Chaque agent suit un cycle :
+
+- analyser le sujet  
+- produire des arguments  
+- observer la réponse adverse  
+- répondre  
+
+👉 Cette technique permet d’avoir un vrai échange et pas des réponses isolées.
+
+---
 
 ### Self-Correction
 
-Le modérateur critique les arguments produits et génère une synthèse cohérente.
+Le modérateur :
 
-👉 Ces techniques ont été choisies car le sujet demandait explicitement d’intégrer des mécanismes de raisonnement et non un simple chatbot :contentReference[oaicite:2]{index=2}.
+- compare les arguments  
+- détecte les points faibles  
+- produit une synthèse  
+
+👉 Cela permet d’avoir un résultat plus équilibré.
 
 ---
 
-## 🛠️ Stack technique
+## 🛠️ Technologies utilisées
 
 - Python  
-- LLM (via API)  
 - Streamlit  
-- Architecture modulaire (agents / core / utils)
+- API LLM  
+- Architecture en modules (agents, core, ui, utils)
 
 ---
 
 ## 🚀 Installation
 
-Cloner le repo :
+Cloner le projet :
 
 ```bash
 git clone https://github.com/AyaDoukarr/projet-ai.git
 cd projet-ai
-````
-
 Installer les dépendances :
 
-```bash
 pip install -r requirements.txt
-```
+🔑 Configuration
 
----
+Créer un fichier .env et ajouter la clé API :
 
-## 🔑 Configuration
-
-Créer le fichier `.env` :
-
-```bash
-cp .env.template .env
-```
-
-Ajouter la clé API :
-
-```
-OPENAI_API_KEY=ta_clef
-```
-
----
-
-## ▶️ Lancer l’application
-
-```bash
+OPENAI_API_KEY=your_key
+▶️ Lancer l’application
 streamlit run app.py
-```
 
 Puis ouvrir :
 
-```
 http://localhost:8501
-```
-
----
-
-## 📁 Structure du projet
-
-```
-projet-ai/
-│── agents/     # logique des agents
-│── core/       # orchestration
-│── ui/         # interface Streamlit
-│── utils/
-│── app.py
-│── requirements.txt
-```
-
----
-
-## 📌 Remarques
-
-* Le comportement dépend fortement du prompt et du sujet proposé
-* Certains débats peuvent produire des réponses variables selon le contexte
-* Le projet vise surtout à illustrer la logique d’orchestration multi-agents
-
----
-
-## 👤 Auteur
-
+📁 Structure du projet
+agents/     → logique des agents
+core/       → communication avec le LLM
+ui/         → interface Streamlit
+utils/      → gestion de session
+app.py      → point d’entrée
+📌 Remarques
+les réponses peuvent varier selon le sujet
+le système dépend du modèle utilisé
+le but est surtout de montrer le raisonnement multi-agents
+👥 Auteurs
 Aya Doukarr
+Aya Es-Smahi
