@@ -26,7 +26,7 @@ def render_header():
 
     st.markdown(
         """
-        ### 🧠 Techniques de raisonnement utilisées
+        ### Techniques de raisonnement utilisées
 
         - **ReAct** : chaque agent analyse le sujet, produit une réponse, observe l’adversaire puis réagit.
         - **Self-Correction** : le modérateur compare les arguments, critique leurs limites et produit une synthèse finale.
