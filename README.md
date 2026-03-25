@@ -24,6 +24,15 @@ Le système repose sur plusieurs agents :
 
 Les agents interagissent entre eux pour construire un débat progressif et structuré.
 
+### Choix des techniques
+
+Le choix des techniques ReAct et Self-Correction a été motivé par la volonté de simuler un raisonnement plus réaliste et structuré.
+
+ReAct permet à chaque agent de ne pas simplement générer du texte, mais de suivre un processus en plusieurs étapes (analyse, réponse, adaptation), ce qui rend le débat plus cohérent et dynamique.
+
+La Self-Correction, via le modérateur, permet d’introduire une prise de recul sur les arguments générés. Cela améliore la qualité des échanges en identifiant les forces et faiblesses de chaque position.
+
+Ces deux approches combinées permettent de dépasser une simple génération de texte pour se rapprocher d’un véritable raisonnement multi-agents.
 
 ## Techniques de raisonnement
 
@@ -75,7 +84,8 @@ Configuration
 
 Créer un fichier .env et ajouter la clé API :
 ```bash
-OPENAI_API_KEY=your_key
+GROQ_API_KEY=your_key
+GROQ_MODEL=llama-3.1-8b-instant
 ```
 Lancer l’application
 ```bash

@@ -7,32 +7,30 @@ load_dotenv()
 
 
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama3-8b-8192")
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 client = OpenAI(
-    api_key=GROQ_API_KEY,
-    base_url="https://api.groq.com/openai/v1"
-) if GROQ_API_KEY else None
-
+    api_key=OPENAI_API_KEY
+) if OPENAI_API_KEY else None
 
 
 
 def check_api_key() -> None:
-    if not GROQ_API_KEY:
-        st.error("❌ Clé API Groq introuvable. Ajoute GROQ_API_KEY dans ton fichier .env")
+    if not OPENAI_API_KEY:
+        st.error("❌ Clé API OpenAI introuvable. Ajoute OPENAI_API_KEY dans ton fichier .env")
         st.stop()
-
 
 
 
 def call_llm(system_prompt: str, user_prompt: str, temperature: float = 0.7) -> str:
     if client is None:
-        return "❌ Erreur : client Groq non initialisé."
+        return "❌ Erreur : client OpenAI non initialisé."
 
     try:
         response = client.chat.completions.create(
-            model=GROQ_MODEL,
+            model=OPENAI_MODEL,
             temperature=temperature,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -45,10 +43,6 @@ def call_llm(system_prompt: str, user_prompt: str, temperature: float = 0.7) -> 
 
     except Exception as e:
         return f"❌ Erreur lors de l'appel au modèle : {e}"
-
-
-
-
 def agent_pro(topic: str) -> str:
     system_prompt = "Tu es un expert qui défend le sujet (position POUR). Donne des arguments convaincants."
     user_prompt = f"Sujet du débat : {topic}"
