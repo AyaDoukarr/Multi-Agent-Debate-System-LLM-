@@ -12,7 +12,7 @@ from core.parser import parse_judge_scores
 from ui.styles import load_css
 from ui.components import plot_scores, render_header, render_sidebar
 from utils.session import init_session_state
-from core.llm import check_api_key
+from core.llm import check_api_key, call_llm
 
 
 st.set_page_config(
@@ -24,7 +24,6 @@ st.set_page_config(
 load_css()
 check_api_key()
 init_session_state()
-
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
@@ -38,6 +37,11 @@ if "debat_genere" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if "debate_context" not in st.session_state:
+    st.session_state.debate_context = ""
+
+if "follow_up_history" not in st.session_state:
+    st.session_state.follow_up_history = []
 
 
 def load_home_css() -> None:
@@ -46,7 +50,6 @@ def load_home_css() -> None:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
         st.warning("Le fichier ui/home.css est introuvable.")
-
 
 
 def go_to_home() -> None:
@@ -59,7 +62,6 @@ def go_to_app(topic: str = "") -> None:
     st.session_state.page = "app"
     st.session_state.preset_topic = topic
     st.rerun()
-
 
 
 def show_home() -> None:
@@ -175,6 +177,111 @@ def show_home() -> None:
         go_to_app("")
 
 
+def render_saved_debate(data: dict, show_judge: bool) -> None:
+    st.markdown("---")
+    st.subheader("📌 Résultats du débat")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("## 🟢 Agent POUR")
+        st.write(data["pour_round1"])
+        st.markdown("### Réponse du camp POUR")
+        st.write(data["pour_round2"])
+
+    with col2:
+        st.markdown("## 🔴 Agent CONTRE")
+        st.write(data["contre_round1"])
+        st.markdown("### Réponse du camp CONTRE")
+        st.write(data["contre_round2"])
+
+    st.markdown("---")
+    st.markdown("## ⚖️ Modérateur")
+    st.write(data["final_summary"])
+
+    if show_judge:
+        st.markdown("---")
+        st.markdown("## 🧠 Analyse du juge IA")
+        st.write(data["judge_result"])
+
+        if data["scores"] is not None:
+            st.markdown("## 📊 Graphique des scores")
+            plot_scores(data["scores"])
+
+            total_pour = sum(data["scores"]["POUR"].values())
+            total_contre = sum(data["scores"]["CONTRE"].values())
+
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Score total POUR", f"{total_pour}/30")
+            c2.metric("Score total CONTRE", f"{total_contre}/30")
+
+            if total_pour > total_contre:
+                c3.metric("Camp gagnant", "POUR")
+            elif total_contre > total_pour:
+                c3.metric("Camp gagnant", "CONTRE")
+            else:
+                c3.metric("Camp gagnant", "ÉGALITÉ")
+
+    st.markdown("---")
+    st.download_button(
+        label="📥 Télécharger le débat complet",
+        data=data["full_debate_text"],
+        file_name="debat_multi_agents.txt",
+        mime="text/plain"
+    )
+
+
+def show_follow_up_section() -> None:
+    if not st.session_state.debate_context:
+        return
+
+    st.markdown("---")
+    st.markdown("## 💬 Poser une nouvelle question sur ce débat")
+
+    st.caption(
+        "Cette fonctionnalité permet de continuer la discussion sans relancer un nouveau débat. "
+        "Le système garde le contexte du débat déjà généré."
+    )
+
+    follow_up_question = st.text_input(
+        "Votre nouvelle question",
+        placeholder="Exemple : Quel camp est le plus convaincant sur le plan logique ?",
+        key="follow_up_question_input"
+    )
+
+    if st.button("Envoyer la question", use_container_width=True, key="follow_up_button"):
+        if not follow_up_question.strip():
+            st.warning("Veuillez entrer une question.")
+        else:
+            with st.spinner("Génération de la réponse..."):
+                system_prompt = """
+Tu es un assistant qui répond à des questions en se basant sur le contexte d’un débat déjà généré.
+Tu dois répondre de manière claire, concise et structurée.
+"""
+
+                user_prompt = f"""
+Contexte du débat :
+{st.session_state.debate_context}
+
+Question de l'utilisateur :
+{follow_up_question}
+"""
+
+                follow_up_answer = call_llm(system_prompt, user_prompt, temperature=0.5)
+
+            st.session_state.follow_up_history.append(
+                {
+                    "question": follow_up_question,
+                    "answer": follow_up_answer,
+                }
+            )
+
+    if st.session_state.follow_up_history:
+        st.markdown("### Historique des questions complémentaires")
+        for i, item in enumerate(st.session_state.follow_up_history, start=1):
+            st.markdown(f"**Question {i} :** {item['question']}")
+            st.write(item["answer"])
+
 
 def show_app() -> None:
     render_header()
@@ -198,6 +305,11 @@ def show_app() -> None:
         launch = st.button("Lancer le débat", use_container_width=True)
     with col_action_2:
         st.caption("Les réponses apparaissent progressivement pendant la génération.")
+
+    if not launch and st.session_state.debat_genere is not None:
+        render_saved_debate(st.session_state.debat_genere, settings["show_judge"])
+        show_follow_up_section()
+        return
 
     if launch:
         if not topic.strip():
@@ -245,7 +357,6 @@ def show_app() -> None:
 
                 metrics_box = st.empty()
 
-        # Messages d'attente
         pour_box_1.info("⏳ Génération de la position initiale du camp POUR...")
         pour_box_2.info("⏳ En attente de la réfutation du camp POUR...")
         contre_box_1.info("⏳ Génération de la position initiale du camp CONTRE...")
@@ -262,7 +373,6 @@ def show_app() -> None:
         if settings["live_mode"]:
             live_status.info("🚀 Le débat commence...")
 
-        # Tour 1 - POUR
         if settings["live_mode"]:
             live_status.info("🟢 Agent POUR réfléchit...")
             time.sleep(1)
@@ -272,7 +382,6 @@ def show_app() -> None:
         pour_box_1.success("✅ Réponse initiale du camp POUR générée")
         pour_box_1.write(pour_round1)
 
-        # Tour 1 - CONTRE
         if settings["live_mode"]:
             live_status.info("🔴 Agent CONTRE réfléchit...")
             time.sleep(1)
@@ -282,7 +391,6 @@ def show_app() -> None:
         contre_box_1.success("✅ Réponse initiale du camp CONTRE générée")
         contre_box_1.write(contre_round1)
 
-        # Réfutation POUR
         if settings["live_mode"]:
             live_status.info("🟢 Agent POUR prépare sa réfutation...")
             time.sleep(1)
@@ -298,7 +406,6 @@ def show_app() -> None:
         pour_box_2.success("✅ Réfutation du camp POUR générée")
         pour_box_2.write(pour_round2)
 
-        # Réfutation CONTRE
         if settings["live_mode"]:
             live_status.info("🔴 Agent CONTRE prépare sa réfutation...")
             time.sleep(1)
@@ -314,7 +421,6 @@ def show_app() -> None:
         contre_box_2.success("✅ Réfutation du camp CONTRE générée")
         contre_box_2.write(contre_round2)
 
-        # Modérateur
         if settings["live_mode"]:
             live_status.info("⚖️ Le modérateur analyse le débat...")
             time.sleep(1)
@@ -330,7 +436,6 @@ def show_app() -> None:
         moderator_box.success("✅ Synthèse du modérateur générée")
         moderator_box.write(final_summary)
 
-        # Juge IA
         judge_result = ""
         scores = None
 
@@ -422,9 +527,34 @@ JUGE IA
             "full_debate_text": full_debate_text,
         }
 
+        st.session_state.debate_context = f"""
+Sujet du débat :
+{topic}
+
+Arguments initiaux du camp POUR :
+{pour_round1}
+
+Arguments initiaux du camp CONTRE :
+{contre_round1}
+
+Réponse du camp POUR :
+{pour_round2}
+
+Réponse du camp CONTRE :
+{contre_round2}
+
+Synthèse du modérateur :
+{final_summary}
+
+Analyse du juge IA :
+{judge_result}
+"""
+
+        st.session_state.follow_up_history = []
         st.session_state.history.append(topic)
         st.session_state.preset_topic = ""
 
+        show_follow_up_section()
 
 
 if st.session_state.page == "home":
